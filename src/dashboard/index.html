@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>?T-Kernel 3.0 Wearable Health Monitor</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo-badge">?TK3</div>
+        <div>
+          <h1>Real-Time Wearable Health-Monitoring System</h1>
+          <p class="subtitle">Powered by ?T-Kernel 3.0 Real-Time OS & Embedded Physiological State AI</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="badge badge-rtos" id="badge-rtos">?T-Kernel 3.0: OK</span>
+        <span class="badge badge-ble" id="badge-ble">BLE GATT: ACTIVE</span>
+        <span class="badge badge-ws" id="badge-ws">LIVE STREAM</span>
+      </div>
+    </header>
+
+    <!-- Alert Banner -->
+    <div id="alert-banner" class="alert-banner hidden">
+      <div class="alert-icon">??</div>
+      <div class="alert-content">
+        <strong id="alert-title">CRITICAL ALERT</strong>
+        <p id="alert-msg">Elevated heart rate without physical exertion detected.</p>
+      </div>
+      <div class="alert-severity" id="alert-sev">WARNING</div>
+    </div>
+
+    <!-- Main Grid -->
+        <!-- Hardware Auto-Detection Bar -->
+    <div class="hardware-status-bar" id="hw-status-bar">
+      <div class="hw-left">
+        <span class="hw-dot dot-emul" id="hw-dot"></span>
+        <span class="hw-mode-text" id="hw-mode-text">DATA SOURCE: PhysioNet Emulation</span>
+        <span class="hw-port" id="hw-port">Port: Auto-Detecting USB/COM & Wi-Fi...</span>
+      </div>
+      <div class="hw-sensors-list">
+        <span class="sensor-badge" id="badge-ad8232">AD8232 [ECG]: EMULATED</span>
+        <span class="sensor-badge" id="badge-max30102">MAX30102 [PPG]: EMULATED</span>
+        <span class="sensor-badge" id="badge-mpu6050">MPU6050 [IMU]: EMULATED</span>
+        <span class="sensor-badge" id="badge-tmp117">TMP117 [TEMP]: EMULATED</span>
+      </div>
+    </div>
+
+    <main class="dashboard-grid">
+      <!-- Row 1: Physiological State & Vitals Summary -->
+      <section class="state-and-vitals-row">
+        <!-- AI State Card -->
+        <div class="card state-card">
+          <div class="card-title">AI PHYSIOLOGICAL STATE DETECTION</div>
+          <div class="state-indicator">
+            <div class="state-badge" id="state-badge">RESTING</div>
+            <div class="state-confidence">Confidence: <span id="state-conf">98.5%</span></div>
+          </div>
+          <div class="anomaly-meter-container">
+            <div class="anomaly-label">
+              <span>Physiological Anomaly Score</span>
+              <span id="anomaly-val">0.05</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-bar" id="anomaly-bar" style="width: 5%;"></div>
+            </div>
+          </div>
+          <div class="state-description" id="state-desc">
+            Subject is sedentary with normal resting cardiovascular and autonomic indices.
+          </div>
+        </div>
+
+        <!-- Metric 1: Heart & Pulse Rate -->
+        <div class="card metric-card">
+          <div class="metric-header">
+            <span class="metric-title">HEART RATE</span>
+            <span class="metric-icon">??</span>
+          </div>
+          <div class="metric-value" id="val-hr">72 <span class="metric-unit">BPM</span></div>
+          <div class="metric-subtext">PPG Pulse Rate: <span id="val-pr">72.1</span> bpm</div>
+        </div>
+
+        <!-- Metric 2: HRV Proxy -->
+        <div class="card metric-card">
+          <div class="metric-header">
+            <span class="metric-title">HRV (SDNN / RMSSD)</span>
+            <span class="metric-icon">??</span>
+          </div>
+          <div class="metric-value" id="val-hrv">48 <span class="metric-unit">ms</span></div>
+          <div class="metric-subtext">RMSSD: <span id="val-rmssd">42</span> ms</div>
+        </div>
+
+        <!-- Metric 3: Skin Temperature -->
+        <div class="card metric-card">
+          <div class="metric-header">
+            <span class="metric-title">SKIN TEMP (TMP117)</span>
+            <span class="metric-icon">???</span>
+          </div>
+          <div class="metric-value" id="val-temp">36.6 <span class="metric-unit">?C</span></div>
+          <div class="metric-subtext">Trend: <span id="val-temptrend">+0.01</span> ?C/min</div>
+        </div>
+
+        <!-- Metric 4: Motion Energy & SMA -->
+        <div class="card metric-card">
+          <div class="metric-header">
+            <span class="metric-title">MOTION INTENSITY</span>
+            <span class="metric-icon">?</span>
+          </div>
+          <div class="metric-value" id="val-motion">0.02 <span class="metric-unit">g</span></div>
+          <div class="metric-subtext">Motion SMA: <span id="val-sma">0.03</span> | Jerk: <span id="val-jerk">0.01</span></div>
+        </div>
+      </section>
+
+      <!-- Row 2: Oscilloscope Waveforms -->
+      <section class="waveforms-section">
+        <div class="card waveform-card">
+          <div class="card-header-flex">
+            <span class="card-title">ECG LEAD I (AD8232 EMULATION) ? 500 Hz FILTERED</span>
+            <span class="signal-tag tag-ecg">BANDPASS 0.5?40 Hz</span>
+          </div>
+          <canvas id="ecgCanvas" width="900" height="140"></canvas>
+        </div>
+
+        <div class="card waveform-card">
+          <div class="card-header-flex">
+            <span class="card-title">PHOTOPLETHYSMOGRAM (MAX30102 PPG PULSE) ? 500 Hz FILTERED</span>
+            <span class="signal-tag tag-ppg">BANDPASS 0.5?5 Hz</span>
+          </div>
+          <canvas id="ppgCanvas" width="900" height="140"></canvas>
+        </div>
+
+        <div class="card waveform-card">
+          <div class="card-header-flex">
+            <span class="card-title">3-AXIS ACCELEROMETER (MPU6050) [X: Green, Y: Blue, Z: Orange]</span>
+            <span class="signal-tag tag-imu">DYNAMIC ACCELERATION</span>
+          </div>
+          <canvas id="imuCanvas" width="900" height="120"></canvas>
+        </div>
+      </section>
+
+      <!-- Row 3: ?T-Kernel 3.0 RTOS Monitor & Control Panel -->
+      <section class="bottom-split-section">
+        <!-- RTOS Diagnostics Panel -->
+        <div class="card rtos-card">
+          <div class="card-header-flex">
+            <span class="card-title">?T-KERNEL 3.0 REAL-TIME TASK MONITOR</span>
+            <span class="signal-tag tag-rtos">STRICT PRIORITY PREEMPTIVE</span>
+          </div>
+          <div class="table-container">
+            <table class="rtos-table">
+              <thead>
+                <tr>
+                  <th>Task Name</th>
+                  <th>Priority</th>
+                  <th>Role</th>
+                  <th>State</th>
+                  <th>Switches</th>
+                </tr>
+              </thead>
+              <tbody id="rtos-tasks-body">
+                <tr><td colspan="5">Awaiting RTOS telemetry...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="ipc-status-row" id="ipc-stats">
+            IPC Mailboxes: Loading...
+          </div>
+        </div>
+
+        <!-- Scenario Control Panel -->
+        <div class="card control-card">
+          <div class="card-title">SIMULATED SENSOR STREAM & SCENARIO CONTROL</div>
+          <p class="control-note">Inject real-time physiological conditions into the ?T-Kernel 3.0 ingestion queue:</p>
+          <div class="scenario-buttons">
+            <button class="btn btn-scenario active" data-scenario="sit">?? Resting (Sit)</button>
+            <button class="btn btn-scenario" data-scenario="walk">?? Active Walk</button>
+            <button class="btn btn-scenario" data-scenario="run">?? Exertion (Run)</button>
+            <button class="btn btn-scenario btn-warn" data-scenario="stress_anomaly">?? Strain Anomaly</button>
+            <button class="btn btn-scenario btn-danger" data-scenario="lead_off">?? Sensor Lead-Off</button>
+          </div>
+          <div class="speed-control">
+            <label>Playback Speed: </label>
+            <button class="btn-speed" data-speed="0.5">0.5x</button>
+            <button class="btn-speed active" data-speed="1.0">1.0x</button>
+            <button class="btn-speed" data-speed="2.0">2.0x</button>
+            <button class="btn-speed" data-speed="5.0">5.0x</button>
+          </div>
+          <div class="ble-packet-preview">
+            <span class="ble-label">Latest BLE GATT Notification (0xFFE1):</span>
+            <code id="ble-hex">0000 02d0 0002 016e 00 05</code>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

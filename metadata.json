@@ -1,0 +1,31 @@
+{
+  "generated_by": "generate_synthetic_dataset.py",
+  "synthetic": true,
+  "sampling_hz": 1.0,
+  "rows": {
+    "training_all": 18000,
+    "demo_stream": 480
+  },
+  "label_counts": {
+    "NORMAL": 17113,
+    "WARNING": 748,
+    "CRITICAL": 619
+  },
+  "columns": [
+    "timestamp",
+    "subject_id",
+    "heart_rate",
+    "spo2",
+    "temperature",
+    "acc_x",
+    "acc_y",
+    "acc_z",
+    "gyro_x",
+    "gyro_y",
+    "gyro_z",
+    "activity",
+    "state_label",
+    "event_type",
+    "source"
+  ]
+}
